@@ -29,8 +29,8 @@ fn read_packets<T: Activated>(mut capture: Capture<T>) {
                 match value.ip {
                     Some(val) => {
                         match val {
-                            Ipv4(..) => println!("{:?}", String::from("IPV4")),
-                            Ipv6(..) => println!("{:?}", String::from("IPV6")),
+                            Ipv4(header, extension) => println!("{:?} and {:?}", String::from("IPV4"), header),
+                            Ipv6(header, ..) => println!("{:?}", String::from("IPV6")),
                         }
                     }
                     _ => {}
