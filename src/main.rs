@@ -1,5 +1,6 @@
 use etherparse::InternetSlice::{Ipv4, Ipv6};
-use etherparse::SlicedPacket;
+use etherparse::{Icmpv4Slice, SlicedPacket, TcpHeader, TcpHeaderSlice};
+use etherparse::TransportSlice::{Icmpv4, Icmpv6, Tcp, Udp, Unknown};
 use pcap::{Activated, Device, Capture, PacketHeader};
 
 fn main() {
@@ -26,11 +27,38 @@ fn read_packets<T: Activated>(mut capture: Capture<T>) {
                 // println!("vlan: {:?}", value.vlan);
                 // println!("ip: {:?}", value.ip);
                 // println!("transport: {:?}", value.transport);
-                match value.ip {
+
+                //per operazioni su livello 3
+                // match value.ip {
+                //     Some(val) => {
+                //         let copy_val = val.clone();
+                //         match copy_val {
+                //             Ipv4(header, extension) =>
+                //                 println!("{:?} and {:?}", String::from("IPV4"), header),
+                //             Ipv6(header, ..) =>
+                //                 println!("{:?}", String::from("IPV6")),
+                //         }
+                //
+                //         // match TcpHeader::from_slice(&packet) {
+                //         //     Err(value) => {},
+                //         //     Ok(result) => {
+                //         //         println!("Tcp: {:?}/n Data: {:?}", result.0, result.1)
+                //         //     }
+                //         // }
+                //     }
+                //     _ => {}
+                // }
+
+                //per operazioni su livello 4
+                match value.transport {
                     Some(val) => {
-                        match val {
-                            Ipv4(header, extension) => println!("{:?} and {:?}", String::from("IPV4"), header),
-                            Ipv6(header, ..) => println!("{:?}", String::from("IPV6")),
+                        let copy_val = val.clone();
+                        match copy_val {
+                            Udp(header_slice) => println!("{:?} and {:?}", String::from("UDP"), header_slice.to_header()),
+                            Tcp(header_slice) => println!("{:?} and {:?}", String::from("TCP"), header_slice.to_header()),
+                            Icmpv4(slice) => println!("{:?} and {:?}", String::from("Icmpv4"), slice.header()),
+                            Icmpv6(slice) => println!("{:?} and {:?}", String::from("Icmpv6"), slice.header()),
+                            Unknown(val) => println!("{:?}", String::from("Unknown"))
                         }
                     }
                     _ => {}
